@@ -23,11 +23,9 @@ export function Topbar() {
     return (
         <header className="flex h-16 items-center gap-4 border-b bg-card px-6 md:px-8 shrink-0">
             <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-                        <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle navigation menu</span>
-                    </Button>
+                <SheetTrigger render={<Button variant="outline" size="icon" className="shrink-0 md:hidden" />}>
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle navigation menu</span>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-64">
                     <SheetTitle className="sr-only">Menu</SheetTitle>
@@ -74,18 +72,16 @@ export function Topbar() {
                 </Button>
 
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-10 w-auto flex items-center gap-3 rounded-full hover:bg-muted/50 pl-2 pr-4">
-                            <div className="hidden md:flex flex-col items-end">
-                                <span className="text-sm font-semibold">Nabil Subagja</span>
-                                <span className="text-xs text-muted-foreground">Wajib Pajak</span>
-                            </div>
-                            <Avatar className="h-8 w-8 bg-primary">
-                                <AvatarFallback className="text-primary-foreground bg-primary">NS</AvatarFallback>
-                            </Avatar>
-                        </Button>
+                    <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-10 w-auto flex items-center gap-3 rounded-full hover:bg-muted/50 pl-2 pr-4" />}>
+                        <div className="hidden md:flex flex-col items-end">
+                            <span className="text-sm font-semibold">Nabil Subagja</span>
+                            <span className="text-xs text-muted-foreground">Wajib Pajak</span>
+                        </div>
+                        <Avatar className="h-8 w-8 bg-primary">
+                            <AvatarFallback className="text-primary-foreground bg-primary">NS</AvatarFallback>
+                        </Avatar>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuContent className="w-56" align="end">
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
                                 <p className="text-sm font-medium leading-none">Nabil Subagja</p>
