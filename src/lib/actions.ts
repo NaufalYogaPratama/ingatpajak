@@ -169,3 +169,75 @@ export async function getCurrentUser() {
         return null;
     }
 }
+
+/**
+ * Add a new vehicle for the current user
+ */
+export async function addVehicle(data: {
+    plateNumber: string;
+    type: string;
+    brandModel: string;
+    manufactureYear: number;
+    taxDueDate: string | Date;
+    estimatedCost: number;
+}) {
+    try {
+        const user = await getCurrentUser();
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        const vehicle = await prisma.vehicle.create({
+            data: {
+                ...data,
+                userId: user.id,
+                taxDueDate: new Date(data.taxDueDate),
+            }
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/history");
+        revalidatePath("/dashboard/calendar");
+
+        return { success: true, data: vehicle };
+    } catch (error) {
+        console.error("Error adding vehicle:", error);
+        return { success: false, error: "Gagal menambah kendaraan. Plat nomor mungkin sudah terdaftar." };
+    }
+}
+
+/**
+ * Delete a vehicle owned by the current user
+ */
+export async function deleteVehicle(vehicleId: string) {
+    try {
+        const user = await getCurrentUser();
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        // Verify ownership
+        const vehicle = await prisma.vehicle.findUnique({
+            where: { id: vehicleId }
+        });
+
+        if (!vehicle || vehicle.userId !== user.id) {
+            return { success: false, error: "Kendaraan tidak ditemukan atau Anda tidak memiliki akses." };
+        }
+
+        // Delete (Note: TaxHistory has ON DELETE CASCADE if configured, otherwise needs manual cleanup)
+        // Check schema.prisma to be sure. If not, delete histories first.
+        await prisma.taxHistory.deleteMany({
+            where: { vehicleId }
+        });
+
+        await prisma.vehicle.delete({
+            where: { id: vehicleId }
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/history");
+        revalidatePath("/dashboard/calendar");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting vehicle:", error);
+        return { success: false, error: "Gagal menghapus kendaraan." };
+    }
+}

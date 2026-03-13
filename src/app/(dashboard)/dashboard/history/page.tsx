@@ -1,19 +1,10 @@
-import { getUserByNikNpwp, getUserVehicles, getUserTaxHistories } from "@/lib/actions";
+import { getUserByNikNpwp, getUserVehicles, getUserTaxHistories, getCurrentUser } from "@/lib/actions";
 import HistoryClient from "./HistoryClient";
 
 export default async function HistoryPage() {
-    // Basic simulation of a logged-in user using the seeded NIK
-    const seededNik = "3319012345678901";
-    const userResult = await getUserByNikNpwp(seededNik);
-    const user = userResult.success ? userResult.data : null;
+    const user = await getCurrentUser();
 
-    if (!user) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <p className="text-slate-500">Gagal memuat data pengguna. Silakan coba lagi nanti.</p>
-            </div>
-        );
-    }
+    if (!user) return null;
 
     const vehiclesResult = await getUserVehicles(user.id);
     const vehicles = vehiclesResult.success ? (vehiclesResult.data || []) : [];

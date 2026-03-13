@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, Download, FileText, CheckCircle2, History as HistoryIcon, AlertCircle } from "lucide-react";
+import { Car, Download, FileText, CheckCircle2, History as HistoryIcon, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { User, Vehicle, TaxHistory } from "@prisma/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { deleteVehicle } from "@/lib/actions";
+import AddVehicleModal from "@/components/vehicles/AddVehicleModal";
 
 interface HistoryClientProps {
     user: User;
@@ -28,9 +30,34 @@ interface HistoryClientProps {
 export default function HistoryClient({ user, vehicles, taxHistories }: HistoryClientProps) {
     const [selectedVehicleId, setSelectedVehicleId] = useState("all");
 
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
     const filteredHistory = selectedVehicleId === "all"
         ? taxHistories
         : taxHistories.filter(h => h.vehicleId === selectedVehicleId);
+
+    async function handleDelete(vehicleId: string) {
+        if (!confirm("Apakah Anda yakin ingin menghapus kendaraan ini? Semua riwayat pajak terkait juga akan dihapus.")) {
+            return;
+        }
+
+        setIsDeleting(vehicleId);
+        try {
+            const result = await deleteVehicle(vehicleId);
+            if (result.success) {
+                toast.success("Kendaraan berhasil dihapus.");
+                if (selectedVehicleId === vehicleId) {
+                    setSelectedVehicleId("all");
+                }
+            } else {
+                toast.error(result.error || "Gagal menghapus kendaraan.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem.");
+        } finally {
+            setIsDeleting(null);
+        }
+    }
 
     // Using the first vehicle as default for info cards if none selected or just general display
     const firstVehicle = vehicles[0];
@@ -72,6 +99,7 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
+                        <AddVehicleModal />
                         <Button variant="outline" className="border-slate-200" size="sm">
                             Bantuan
                         </Button>
@@ -145,7 +173,7 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                     <Card className="flex-1 border-slate-100 shadow-sm overflow-hidden flex flex-col">
                         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <h3 className="font-bold text-lg text-slate-900">Riwayat Pajak Kendaraan</h3>
-                            <Select value={selectedVehicleId} onValueChange={(val) => setSelectedVehicleId(val)}>
+                            <Select value={selectedVehicleId} onValueChange={(val) => setSelectedVehicleId(val as string)}>
                                 <SelectTrigger className="w-full sm:w-[200px] h-9 text-sm">
                                     <SelectValue placeholder="Semua Kendaraan" />
                                 </SelectTrigger>
@@ -165,7 +193,7 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                         <TableHead className="font-semibold text-slate-600">KENDARAAN</TableHead>
                                         <TableHead className="font-semibold text-slate-600">NOMINAL TOTAL</TableHead>
                                         <TableHead className="font-semibold text-slate-600">STATUS</TableHead>
-                                        <TableHead className="w-[80px] text-right font-semibold text-slate-600">BUKTI</TableHead>
+                                        <TableHead className="w-[120px] text-right font-semibold text-slate-600">AKSI</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -187,15 +215,27 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-slate-400 hover:text-blue-600"
-                                                    title="Unduh TBPKP"
-                                                    onClick={() => toast("Fitur Unduh TBPKP akan segera hadir!")}
-                                                >
-                                                    <FileText className="h-4 w-4" />
-                                                </Button>
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-slate-400 hover:text-blue-600"
+                                                        title="Unduh TBPKP"
+                                                        onClick={() => toast("Fitur Unduh TBPKP akan segera hadir!")}
+                                                    >
+                                                        <FileText className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-slate-400 hover:text-red-600"
+                                                        title="Hapus Kendaraan"
+                                                        disabled={isDeleting === history.vehicleId}
+                                                        onClick={() => handleDelete(history.vehicleId)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

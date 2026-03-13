@@ -1,23 +1,17 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { getUserByNikNpwp } from "@/lib/actions";
+import { getUserByNikNpwp, getCurrentUser } from "@/lib/actions";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // Basic simulation of a logged-in user using the seeded NIK
-    const seededNik = "3319012345678901";
-    const userResult = await getUserByNikNpwp(seededNik);
-    const user = userResult.success ? userResult.data : null;
+    const user = await getCurrentUser();
 
     if (!user) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p className="text-slate-500">Gagal memuat data pengguna.</p>
-            </div>
-        );
+        redirect("/login");
     }
 
     return (

@@ -4,24 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { mockNewsArticles } from "@/data/mock";
-import { getUserByNikNpwp, getUserVehicles } from "@/lib/actions";
+import { getUserByNikNpwp, getUserVehicles, getCurrentUser } from "@/lib/actions";
 import { Vehicle } from "@prisma/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
 export default async function DashboardPage() {
-    // Basic simulation of a logged-in user using the seeded NIK
-    const seededNik = "3319012345678901";
-    const userResult = await getUserByNikNpwp(seededNik);
-    const user = userResult.success ? userResult.data : null;
+    const user = await getCurrentUser();
 
-    if (!user) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <p className="text-slate-500">Gagal memuat data pengguna. Silakan coba lagi nanti.</p>
-            </div>
-        );
-    }
+    if (!user) return null; // Component will redirect in layout
 
     const vehiclesResult = await getUserVehicles(user.id);
     const vehicles = vehiclesResult.success ? vehiclesResult.data : [];
