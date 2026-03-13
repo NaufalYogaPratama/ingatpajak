@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import { mockUser, mockVehicles, mockCalendarEvents } from "@/data/mock";
 
 // Mock calendar grid data for October 2023
@@ -25,6 +26,12 @@ const calendarDays = Array.from({ length: 35 }, (_, i) => {
 export default function CalendarPage() {
     const [waToggle, setWaToggle] = useState(true);
     const [emailToggle, setEmailToggle] = useState(true);
+    const [selectedDate, setSelectedDate] = useState<number | null>(15); // Default to the 15th
+
+    // Find the primary event for the selected date to show in the right panel
+    const selectedDateObj = selectedDate ? calendarDays.find(d => d.day === selectedDate && d.isCurrentMonth) : null;
+    const selectedEvent = selectedDateObj?.events.length ? selectedDateObj.events[0] : null;
+    const selectedVehicle = selectedEvent ? mockVehicles.find(v => v.id === selectedEvent.vehicleId) : null;
 
     return (
         <div className="flex flex-col xl:flex-row gap-6">
@@ -36,7 +43,7 @@ export default function CalendarPage() {
                         <p className="text-slate-500">Kalender IngatPajak {mockUser.name}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" className="gap-2 border-slate-200">
+                        <Button variant="outline" className="gap-2 border-slate-200" onClick={() => toast("Fitur ini akan segera hadir!")}>
                             <RefreshCw className="h-4 w-4 text-slate-500" />
                             Sync Samsat
                         </Button>
@@ -62,10 +69,11 @@ export default function CalendarPage() {
                         {calendarDays.map((date, i) => (
                             <div
                                 key={i}
-                                className={`min-h-[100px] p-2 bg-white flex flex-col ${!date.isCurrentMonth ? 'text-slate-300' : 'text-slate-700'}`}
+                                onClick={() => { if (date.isCurrentMonth) setSelectedDate(date.day) }}
+                                className={`min-h-[100px] p-2 bg-white flex flex-col transition-colors ${date.isCurrentMonth ? 'cursor-pointer hover:bg-slate-50' : ''} ${!date.isCurrentMonth ? 'text-slate-300' : 'text-slate-700'} ${selectedDate === date.day && date.isCurrentMonth ? 'ring-2 ring-inset ring-blue-500 bg-blue-50/30' : ''}`}
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-sm font-medium w-8 h-8 flex items-center justify-center rounded-full ${date.day === 15 && date.isCurrentMonth ? 'bg-yellow-400 text-yellow-900' : ''}`}>
+                                    <span className={`text-sm font-medium w-8 h-8 flex items-center justify-center rounded-full ${date.events.some(e => e.type === 'Jatuh Tempo') && date.isCurrentMonth ? 'bg-yellow-400 text-yellow-900' : ''} ${selectedDate === date.day && date.isCurrentMonth && !date.events.some(e => e.type === 'Jatuh Tempo') ? 'bg-blue-600 text-white' : ''}`}>
                                         {date.day}
                                     </span>
                                 </div>
@@ -131,82 +139,89 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Selected Vehicle Card */}
-                <div className="bg-white border rounded-2xl p-6 shadow-xl shadow-blue-900/5 relative overflow-hidden border-yellow-400/50">
-                    {/* Decorative Accent */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-yellow-400 to-yellow-500"></div>
+                {selectedVehicle ? (
+                    <div className="bg-white border rounded-2xl p-6 shadow-xl shadow-blue-900/5 relative overflow-hidden border-yellow-400/50">
+                        {/* Decorative Accent */}
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-yellow-400 to-yellow-500"></div>
 
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex gap-2">
-                            <Badge className="bg-yellow-400 text-yellow-900 hover:bg-yellow-500 border-none rounded whitespace-nowrap"><Car className="h-3 w-3 mr-1" /> Mobil</Badge>
-                            <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50 hover:bg-red-50 rounded whitespace-nowrap">⚠️ Segera</Badge>
-                        </div>
-                        <span className="text-red-500 font-bold text-sm">15 Okt</span>
-                    </div>
-
-                    <div className="mb-6">
-                        <h3 className="font-bold text-xl text-slate-900">{mockVehicles[1].model}</h3>
-                        <p className="text-slate-500 text-sm mt-0.5">Plat: {mockVehicles[1].plate}</p>
-                    </div>
-
-                    <div className="space-y-3 mb-6">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500">PKB Pokok</span>
-                            <span className="font-semibold text-slate-700">Rp {mockVehicles[1].pkbPokok.toLocaleString('id-ID')}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500">SWDKLLJ</span>
-                            <span className="font-semibold text-slate-700">Rp {mockVehicles[1].swdkllj.toLocaleString('id-ID')}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-3 border-t border-dashed border-slate-200">
-                            <span className="text-blue-600 font-bold">Total Estimasi</span>
-                            <span className="font-bold text-blue-600 text-lg">Rp {mockVehicles[1].totalEstimation.toLocaleString('id-ID')}</span>
-                        </div>
-                    </div>
-
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 mb-6 h-12 shadow-md shadow-blue-600/20">
-                        Bayar via e-Samsat Jateng
-                    </Button>
-
-                    {/* Notifications Section */}
-                    <div className="bg-slate-50 -mx-6 -mb-6 p-6 border-t border-slate-100">
-                        <p className="text-xs font-bold text-slate-500 tracking-wider mb-4">NOTIFIKASI:</p>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <MessageSquare className="h-4 w-4 text-emerald-500" />
-                                    <span className="text-sm font-medium text-slate-700">WhatsApp</span>
-                                </div>
-                                {/* Placeholder for Switch if shadcn switch isn't installed properly, standard HTML toggle to fall back */}
-                                <div className="relative">
-                                    {Switch ? (
-                                        <Switch checked={waToggle} onCheckedChange={setWaToggle} className="data-[state=checked]:bg-blue-600" />
-                                    ) : (
-                                        <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer ${waToggle ? 'bg-blue-600' : 'bg-slate-200'}`} onClick={() => setWaToggle(!waToggle)}>
-                                            <div className={`w-4 h-4 rounded-full bg-white transition-transform mt-1 ${waToggle ? 'translate-x-5' : 'translate-x-1'}`}></div>
-                                        </div>
-                                    )}
-                                </div>
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex gap-2">
+                                <Badge className="bg-yellow-400 text-yellow-900 hover:bg-yellow-500 border-none rounded whitespace-nowrap"><Car className="h-3 w-3 mr-1" /> Mobil</Badge>
+                                <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50 hover:bg-red-50 rounded whitespace-nowrap">⚠️ Segera</Badge>
                             </div>
+                            <span className="text-red-500 font-bold text-sm">{selectedDate} Okt</span>
+                        </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <Mail className="h-4 w-4 text-slate-400" />
-                                    <span className="text-sm font-medium text-slate-700">Centang / Email</span>
-                                </div>
-                                <div className="relative">
-                                    {Switch ? (
-                                        <Switch checked={emailToggle} onCheckedChange={setEmailToggle} className="data-[state=checked]:bg-blue-600" />
-                                    ) : (
-                                        <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer ${emailToggle ? 'bg-blue-600' : 'bg-slate-200'}`} onClick={() => setEmailToggle(!emailToggle)}>
-                                            <div className={`w-4 h-4 rounded-full bg-white transition-transform mt-1 ${emailToggle ? 'translate-x-5' : 'translate-x-1'}`}></div>
-                                        </div>
-                                    )}
-                                </div>
+                        <div className="mb-6">
+                            <h3 className="font-bold text-xl text-slate-900">{selectedVehicle.model}</h3>
+                            <p className="text-slate-500 text-sm mt-0.5">Plat: {selectedVehicle.plate}</p>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">PKB Pokok</span>
+                                <span className="font-semibold text-slate-700">Rp {selectedVehicle.pkbPokok.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">SWDKLLJ</span>
+                                <span className="font-semibold text-slate-700">Rp {selectedVehicle.swdkllj.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-3 border-t border-dashed border-slate-200">
+                                <span className="text-blue-600 font-bold">Total Estimasi</span>
+                                <span className="font-bold text-blue-600 text-lg">Rp {selectedVehicle.totalEstimation.toLocaleString('id-ID')}</span>
                             </div>
                         </div>
+
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 mb-6 h-12 shadow-md shadow-blue-600/20" onClick={() => toast("Fitur ini akan segera hadir!")}>
+                            Bayar via e-Samsat Jateng
+                        </Button>
+
+                        {/* Notifications Section */}
+                        <div className="bg-slate-50 -mx-6 -mb-6 p-6 border-t border-slate-100">
+                            <p className="text-xs font-bold text-slate-500 tracking-wider mb-4">NOTIFIKASI:</p>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <MessageSquare className="h-4 w-4 text-emerald-500" />
+                                        <span className="text-sm font-medium text-slate-700">WhatsApp</span>
+                                    </div>
+                                    <div className="relative">
+                                        {Switch ? (
+                                            <Switch checked={waToggle} onCheckedChange={setWaToggle} className="data-[state=checked]:bg-blue-600" />
+                                        ) : (
+                                            <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer ${waToggle ? 'bg-blue-600' : 'bg-slate-200'}`} onClick={() => setWaToggle(!waToggle)}>
+                                                <div className={`w-4 h-4 rounded-full bg-white transition-transform mt-1 ${waToggle ? 'translate-x-5' : 'translate-x-1'}`}></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <Mail className="h-4 w-4 text-slate-400" />
+                                        <span className="text-sm font-medium text-slate-700">Centang / Email</span>
+                                    </div>
+                                    <div className="relative">
+                                        {Switch ? (
+                                            <Switch checked={emailToggle} onCheckedChange={setEmailToggle} className="data-[state=checked]:bg-blue-600" />
+                                        ) : (
+                                            <div className={`w-10 h-6 rounded-full transition-colors cursor-pointer ${emailToggle ? 'bg-blue-600' : 'bg-slate-200'}`} onClick={() => setEmailToggle(!emailToggle)}>
+                                                <div className={`w-4 h-4 rounded-full bg-white transition-transform mt-1 ${emailToggle ? 'translate-x-5' : 'translate-x-1'}`}></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="bg-white border text-center border-slate-200 border-dashed rounded-2xl p-10 text-slate-500 flex flex-col items-center justify-center">
+                        <CalendarIcon className="h-10 w-10 text-slate-300 mb-3" />
+                        <p className="text-sm font-medium">Tidak ada tagihan kendaraan pada tanggal ini.</p>
+                        <p className="text-xs text-slate-400 mt-1">Pilih tanggal yang memiliki tanda kuning.</p>
+                    </div>
+                )}
 
                 {/* Promotion Widget */}
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 relative overflow-hidden group hover:shadow-md transition-shadow cursor-pointer mt-8">

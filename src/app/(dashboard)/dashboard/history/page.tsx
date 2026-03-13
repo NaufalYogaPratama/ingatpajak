@@ -15,6 +15,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { mockUser, mockVehicles, mockTaxHistories } from "@/data/mock";
+import { toast } from "sonner";
 
 export default function HistoryPage() {
     const [selectedVehicle, setSelectedVehicle] = useState("all");
@@ -145,7 +146,7 @@ export default function HistoryPage() {
                     </div>
 
                     <div className="relative z-10 shrink-0">
-                        <Button className="bg-white text-blue-700 hover:bg-slate-50 font-bold px-6 py-5 rounded-xl w-full sm:w-auto">
+                        <Button className="bg-white text-blue-700 hover:bg-slate-50 font-bold px-6 py-5 rounded-xl w-full sm:w-auto" onClick={() => toast("Fitur ini akan segera hadir!")}>
                             Cek Syarat & Ketentuan
                         </Button>
                     </div>
@@ -200,7 +201,7 @@ export default function HistoryPage() {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Button variant="ghost" size="icon-sm" className="text-slate-400 hover:text-blue-600" title="Unduh TBPKP">
+                                                    <Button variant="ghost" size="icon-sm" className="text-slate-400 hover:text-blue-600" title="Unduh TBPKP" onClick={() => toast("Fitur Unduh TBPKP akan segera hadir!")}>
                                                         <FileText className="h-4 w-4" />
                                                     </Button>
                                                 </TableCell>
@@ -238,7 +239,7 @@ export default function HistoryPage() {
                                         Jatuh Tempo: 15 Nov
                                     </div>
                                 </div>
-                                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => toast("Fitur ini akan segera hadir!")}>
                                     Bayar Sekarang (E-Samsat)
                                 </Button>
                             </CardContent>
@@ -261,7 +262,7 @@ export default function HistoryPage() {
                                             <p className="text-xs text-slate-400 mt-0.5">PDF • 1.2 MB</p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0">
+                                    <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0" onClick={() => toast("Fitur Unduh akan segera hadir!")}>
                                         <Download className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -276,12 +277,12 @@ export default function HistoryPage() {
                                             <p className="text-xs text-slate-400 mt-0.5">PDF • 840 KB</p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0">
+                                    <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0" onClick={() => toast("Fitur Unduh akan segera hadir!")}>
                                         <Download className="h-4 w-4" />
                                     </Button>
                                 </div>
 
-                                <Button variant="outline" className="w-full mt-2 text-slate-600 hover:text-blue-600 border-dashed border-slate-300">
+                                <Button variant="outline" className="w-full mt-2 text-slate-600 hover:text-blue-600 border-dashed border-slate-300" onClick={() => toast("Fitur ini akan segera hadir!")}>
                                     Lihat Semua Dokumen
                                 </Button>
                             </CardContent>

@@ -24,11 +24,11 @@ export default function DashboardPage() {
                             Jangan lupa, batas waktu pelaporan <span className="font-semibold text-blue-600">Pajak Kendaraan Pribadi</span> tinggal <span className="bg-yellow-100 text-yellow-800 font-semibold px-2 py-0.5 rounded">3 hari lagi</span> . Mari laporkan tepat waktu untuk kemajuan Kudus.
                         </p>
                         <div className="flex gap-3 shrink-0">
-                            <Button render={<Link href="/dashboard/calendar" />} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                            <Button nativeButton={false} render={<Link href="/dashboard/calendar" />} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
                                 <PenTool className="h-4 w-4" />
                                 Lapor Sekarang
                             </Button>
-                            <Button render={<Link href="/dashboard/history" />} variant="outline" className="flex items-center gap-2 border-slate-200">
+                            <Button nativeButton={false} render={<Link href="/dashboard/history" />} variant="outline" className="flex items-center gap-2 border-slate-200">
                                 <CalendarIcon className="h-4 w-4" />
                                 Riwayat
                             </Button>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="mt-auto pt-2">
-                                <Button render={<Link href="/dashboard/calendar" />} variant="ghost" className="w-full justify-center bg-blue-50 text-sm text-blue-700 hover:bg-blue-100 hover:text-blue-800">
+                                <Button nativeButton={false} render={<Link href="/dashboard/calendar" />} variant="ghost" className="w-full justify-center bg-blue-50 text-sm text-blue-700 hover:bg-blue-100 hover:text-blue-800">
                                     Lihat Jadwal Lengkap <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </div>
