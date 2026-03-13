@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Menu, User } from "lucide-react";
+import { Bell, Menu, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -16,9 +16,15 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { navigationLinks } from "./Sidebar";
 import { cn } from "@/lib/utils";
+import type { User as UserType } from "@prisma/client";
 
-export function Topbar() {
+interface TopbarProps {
+    user: UserType;
+}
+
+export function Topbar({ user }: TopbarProps) {
     const pathname = usePathname();
+    const initials = user.name ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) : "WP";
 
     return (
         <header className="flex h-16 items-center gap-4 border-b bg-card px-6 md:px-8 shrink-0">
@@ -74,19 +80,19 @@ export function Topbar() {
                 <DropdownMenu>
                     <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-10 w-auto flex items-center gap-3 rounded-full hover:bg-muted/50 pl-2 pr-4" />}>
                         <div className="hidden md:flex flex-col items-end">
-                            <span className="text-sm font-semibold">Nabil Subagja</span>
+                            <span className="text-sm font-semibold">{user.name}</span>
                             <span className="text-xs text-muted-foreground">Wajib Pajak</span>
                         </div>
                         <Avatar className="h-8 w-8 bg-primary">
-                            <AvatarFallback className="text-primary-foreground bg-primary">NS</AvatarFallback>
+                            <AvatarFallback className="text-primary-foreground bg-primary">{initials}</AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end">
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium leading-none">Nabil Subagja</p>
+                                <p className="text-sm font-medium leading-none">{user.name}</p>
                                 <p className="text-xs leading-none text-muted-foreground">
-                                    nabil@example.com
+                                    {user.email}
                                 </p>
                             </div>
                         </DropdownMenuLabel>

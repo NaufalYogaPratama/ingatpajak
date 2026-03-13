@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
     // Find the vehicle with the nearest tax due date
     const today = new Date();
-    const upcomingVehicles = vehicles
+    const upcomingVehicles = (vehicles || [])
         .filter((v: Vehicle) => new Date(v.taxDueDate) >= today)
         .sort((a: Vehicle, b: Vehicle) => new Date(a.taxDueDate).getTime() - new Date(b.taxDueDate).getTime());
 

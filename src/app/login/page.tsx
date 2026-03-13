@@ -8,19 +8,35 @@ import { Shield, MessageSquare, Smartphone, Mail, CreditCard } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginUser } from "@/lib/actions";
+import { toast } from "sonner";
 
 export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate API call for login
-        setTimeout(() => {
+
+        const formData = new FormData(e.currentTarget);
+        const nik = formData.get("nik") as string;
+        const phone = formData.get("phone") as string;
+        const email = formData.get("email") as string;
+
+        try {
+            const result = await loginUser(nik, phone, email);
+            if (result.success) {
+                toast.success("Login berhasil!");
+                router.push("/dashboard");
+            } else {
+                toast.error(result.error || "Gagal login.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem.");
+        } finally {
             setIsLoading(false);
-            router.push("/dashboard");
-        }, 1000);
+        }
     };
 
     return (
@@ -94,6 +110,7 @@ export default function LoginPage() {
                                 </div>
                                 <Input
                                     id="nik"
+                                    name="nik"
                                     placeholder="Masukkan 16 digit NIK atau 15 digit NPWP"
                                     className="pl-10 h-12 bg-slate-50/50 border-slate-200"
                                     required
@@ -109,6 +126,7 @@ export default function LoginPage() {
                                 </div>
                                 <Input
                                     id="phone"
+                                    name="phone"
                                     type="tel"
                                     placeholder="Contoh: 08123456789"
                                     className="pl-10 h-12 bg-slate-50/50 border-slate-200"
@@ -125,6 +143,7 @@ export default function LoginPage() {
                                 </div>
                                 <Input
                                     id="email"
+                                    name="email"
                                     type="email"
                                     placeholder="nama@email.com"
                                     className="pl-10 h-12 bg-slate-50/50 border-slate-200"

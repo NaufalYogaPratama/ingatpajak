@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { mockUser, mockVehicles, mockTaxHistories } from "../src/data/mock";
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL }) as any;
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
