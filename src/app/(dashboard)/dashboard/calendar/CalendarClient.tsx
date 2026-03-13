@@ -181,8 +181,12 @@ export default function CalendarClient({ user, vehicles }: CalendarClientProps) 
                             </div>
                         </div>
 
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 mb-6 h-12 shadow-md shadow-blue-600/20" onClick={() => toast("Fitur pembayaran akan segera hadir!")}>
-                            Bayar Sekarang
+                        <Button
+                            nativeButton={false}
+                            render={<a href="https://sakpole.jatengprov.go.id/" target="_blank" rel="noopener noreferrer" />}
+                            className="w-full bg-blue-600 hover:bg-blue-700"
+                        >
+                            Bayar Sekarang (E-Samsat)
                         </Button>
 
                         {/* Notifications Section */}

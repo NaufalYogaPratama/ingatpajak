@@ -268,7 +268,11 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                         Pajak tahunan akan segera jatuh tempo pada {firstVehicle && format(new Date(firstVehicle.taxDueDate), "d MMM", { locale: id })}. Hindari denda dengan membayar tepat waktu.
                                     </p>
                                 </div>
-                                <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => toast("Fitur ini akan segera hadir!")}>
+                                <Button
+                                    nativeButton={false}
+                                    render={<a href="https://sakpole.jatengprov.go.id/" target="_blank" rel="noopener noreferrer" />}
+                                    className="w-full bg-blue-600 hover:bg-blue-700"
+                                >
                                     Bayar Sekarang (E-Samsat)
                                 </Button>
                             </CardContent>
