@@ -1,15 +1,47 @@
-"use client";
-
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Calendar as CalendarIcon, Lightbulb, PenTool, AlertTriangle, ExternalLink } from "lucide-react";
+import { ArrowRight, Calendar as CalendarIcon, Lightbulb, PenTool, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { mockUser, mockNewsArticles } from "@/data/mock";
+import { mockNewsArticles } from "@/data/mock";
+import { getUserByNikNpwp, getUserVehicles } from "@/lib/actions";
+import { Vehicle } from "@prisma/client";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
-export default function DashboardPage() {
-    const firstName = mockUser.name.split(" ")[0];
+export default async function DashboardPage() {
+    // Basic simulation of a logged-in user using the seeded NIK
+    const seededNik = "3319012345678901";
+    const userResult = await getUserByNikNpwp(seededNik);
+    const user = userResult.success ? userResult.data : null;
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <p className="text-slate-500">Gagal memuat data pengguna. Silakan coba lagi nanti.</p>
+            </div>
+        );
+    }
+
+    const vehiclesResult = await getUserVehicles(user.id);
+    const vehicles = vehiclesResult.success ? vehiclesResult.data : [];
+
+    const firstName = user.name?.split(" ")[0] || "Pengguna";
+
+    // Find the vehicle with the nearest tax due date
+    const today = new Date();
+    const upcomingVehicles = vehicles
+        .filter((v: Vehicle) => new Date(v.taxDueDate) >= today)
+        .sort((a: Vehicle, b: Vehicle) => new Date(a.taxDueDate).getTime() - new Date(b.taxDueDate).getTime());
+
+    const nextDueVehicle = upcomingVehicles[0];
+    const daysUntilDue = nextDueVehicle
+        ? Math.ceil((new Date(nextDueVehicle.taxDueDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+    const formattedDueDate = nextDueVehicle
+        ? format(new Date(nextDueVehicle.taxDueDate), "d MMMM yyyy", { locale: id })
+        : null;
 
     return (
         <div className="space-y-8">
@@ -21,7 +53,13 @@ export default function DashboardPage() {
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <p className="text-slate-600 leading-relaxed max-w-2xl">
-                            Jangan lupa, batas waktu pelaporan <span className="font-semibold text-blue-600">Pajak Kendaraan Pribadi</span> tinggal <span className="bg-yellow-100 text-yellow-800 font-semibold px-2 py-0.5 rounded">3 hari lagi</span> . Mari laporkan tepat waktu untuk kemajuan Kudus.
+                            {nextDueVehicle ? (
+                                <>
+                                    Jangan lupa, batas waktu pelaporan <span className="font-semibold text-blue-600">Pajak Kendaraan ({nextDueVehicle.plateNumber})</span> tinggal <span className="bg-yellow-100 text-yellow-800 font-semibold px-2 py-0.5 rounded">{daysUntilDue} hari lagi</span>. Mari laporkan tepat waktu untuk kemajuan Kudus.
+                                </>
+                            ) : (
+                                "Semua pajak kendaraan Anda terpantau aman. Terima kasih telah tertib administrasi!"
+                            )}
                         </p>
                         <div className="flex gap-3 shrink-0">
                             <Button nativeButton={false} render={<Link href="/dashboard/calendar" />} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
@@ -46,10 +84,12 @@ export default function DashboardPage() {
                                 <CalendarIcon className="h-5 w-5 text-blue-600" />
                                 <CardTitle className="text-base">Kalender Pajak</CardTitle>
                             </div>
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">Oktober 2023</Badge>
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
+                                {format(today, "MMMM yyyy", { locale: id })}
+                            </Badge>
                         </CardHeader>
                         <CardContent className="p-4 flex-1 flex flex-col">
-                            {/* Mini Calendar Grid (Static Mock) */}
+                            {/* Mini Calendar Grid (Static Mock - Placeholder for future implementation) */}
                             <div className="grid grid-cols-7 gap-1 text-center text-xs mb-4">
                                 <div className="text-slate-400 font-medium py-1">M</div>
                                 <div className="text-slate-400 font-medium py-1">S</div>
@@ -59,42 +99,24 @@ export default function DashboardPage() {
                                 <div className="text-slate-400 font-medium py-1">J</div>
                                 <div className="text-slate-400 font-medium py-1">S</div>
 
-                                {/* Week 1 */}
-                                <div className="text-slate-300 py-1.5">1</div>
-                                <div className="text-slate-300 py-1.5">2</div>
-                                <div className="text-slate-300 py-1.5">3</div>
-                                <div className="text-slate-300 py-1.5">4</div>
-                                <div className="text-slate-300 py-1.5">5</div>
-                                <div className="text-slate-300 py-1.5">6</div>
-                                <div className="text-slate-300 py-1.5">7</div>
-
-                                {/* Week 2 */}
-                                <div className="text-slate-300 py-1.5">8</div>
-                                <div className="text-slate-300 py-1.5">9</div>
-                                <div className="text-slate-300 py-1.5">10</div>
-                                <div className="text-slate-300 py-1.5">11</div>
-                                <div className="text-slate-300 py-1.5">12</div>
-                                <div className="text-slate-300 py-1.5">13</div>
-                                <div className="text-slate-300 py-1.5">14</div>
-
-                                {/* Week 3 */}
-                                <div className="bg-blue-600 text-white rounded-md font-medium py-1.5 shadow-sm">15</div>
-                                <div className="text-slate-700 font-medium py-1.5">16</div>
-                                <div className="text-slate-700 font-medium py-1.5">17</div>
-                                <div className="text-slate-700 font-medium py-1.5">18</div>
-                                <div className="text-slate-700 font-medium py-1.5">19</div>
-                                <div className="text-slate-700 font-medium py-1.5">20</div>
-                                <div className="text-slate-700 font-medium py-1.5">21</div>
+                                {/* Placeholder dates for current month visualization */}
+                                {Array.from({ length: 21 }).map((_, i) => (
+                                    <div key={i} className={`py-1.5 ${i === 14 ? 'bg-blue-600 text-white rounded-md font-medium shadow-sm' : 'text-slate-300'}`}>
+                                        {i + 1}
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Alert Alert Widget */}
-                            <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 flex gap-3 mb-4">
-                                <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
-                                <div>
-                                    <p className="text-sm font-semibold text-yellow-800">Batas Setor Pajak</p>
-                                    <p className="text-xs text-yellow-600 mt-0.5">15 Oktober 2023</p>
+                            {/* Alert Widget */}
+                            {nextDueVehicle && (
+                                <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 flex gap-3 mb-4">
+                                    <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-yellow-800">Batas Setor Pajak</p>
+                                        <p className="text-xs text-yellow-600 mt-0.5">{formattedDueDate}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Trivia Widget */}
                             <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 mb-4">
@@ -143,21 +165,9 @@ export default function DashboardPage() {
                                 <Badge className="absolute top-4 left-4 bg-blue-600 hover:bg-blue-700 border-none">
                                     {mockNewsArticles[0].category}
                                 </Badge>
-                                {/* Abstract representation of the image from mockup */}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-30">
                                     <div className="w-24 h-24 rounded-full border-4 border-white/50 flex items-center justify-center">
                                         <div className="w-16 h-16 rounded-full bg-white/50"></div>
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-0 inset-x-0 h-20 flex justify-center gap-8 items-end px-8 z-10">
-                                    {/* Silhouettes */}
-                                    <div className="w-12 h-16 bg-slate-800 rounded-t-lg mx-auto relative opacity-80">
-                                        <div className="absolute top-2 w-full flex justify-center"><div className="w-8 h-8 rounded-full bg-[#fcd4b6]"></div></div>
-                                        <div className="absolute bottom-0 w-full h-8 bg-slate-800 border-t-2 border-white/20"></div>
-                                    </div>
-                                    <div className="w-12 h-18 bg-red-800 rounded-t-lg mx-auto relative opacity-80">
-                                        <div className="absolute top-1 w-full flex justify-center"><div className="w-8 h-8 rounded-full bg-[#fcd4b6]"></div></div>
-                                        <div className="absolute bottom-0 w-full h-10 bg-red-800 border-t-2 border-white/20"></div>
                                     </div>
                                 </div>
                             </div>
@@ -200,18 +210,11 @@ export default function DashboardPage() {
                                 <Badge className="self-start bg-purple-600 hover:bg-purple-700 mb-6 relative z-10 border-none">
                                     {mockNewsArticles[1].category}
                                 </Badge>
-                                {/* Abstract Tablet Mockup */}
                                 <div className="m-auto w-32 h-40 bg-slate-900 rounded-xl p-2 relative shadow-lg">
                                     <div className="w-full h-full bg-white rounded-md overflow-hidden relative">
                                         <div className="mt-4 px-2 space-y-1">
                                             <div className="h-1 bg-slate-200 w-1/2 rounded-full"></div>
                                             <div className="h-0.5 bg-slate-100 w-full rounded-full"></div>
-                                        </div>
-                                        <div className="absolute bottom-2 inset-x-2 h-16 flex items-end justify-between gap-1">
-                                            <div className="w-full bg-emerald-200 rounded-t-sm h-1/4"></div>
-                                            <div className="w-full bg-emerald-300 rounded-t-sm h-2/4"></div>
-                                            <div className="w-full bg-emerald-400 rounded-t-sm h-3/4"></div>
-                                            <div className="w-full bg-emerald-500 rounded-t-sm h-full"></div>
                                         </div>
                                     </div>
                                 </div>

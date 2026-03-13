@@ -3,7 +3,6 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// Fetch a user by nik_npwp (for basic login simulation).
 export async function getUserByNikNpwp(nik_npwp: string) {
     try {
         const user = await prisma.user.findUnique({
@@ -16,7 +15,6 @@ export async function getUserByNikNpwp(nik_npwp: string) {
     }
 }
 
-// Fetch all vehicles for a specific user ID.
 export async function getUserVehicles(userId: string) {
     try {
         const vehicles = await prisma.vehicle.findMany({
@@ -30,7 +28,6 @@ export async function getUserVehicles(userId: string) {
     }
 }
 
-// Fetch the tax history for a specific vehicle ID.
 export async function getVehicleTaxHistory(vehicleId: string) {
     try {
         const history = await prisma.taxHistory.findMany({
@@ -44,7 +41,6 @@ export async function getVehicleTaxHistory(vehicleId: string) {
     }
 }
 
-// Update/Toggle the notification settings for a specific vehicle.
 export async function toggleNotification(
     vehicleId: string,
     type: "wa" | "email",
@@ -59,6 +55,7 @@ export async function toggleNotification(
         });
 
         revalidatePath("/dashboard/calendar");
+        revalidatePath("/dashboard");
 
         return { success: true, data: vehicle };
     } catch (error) {
