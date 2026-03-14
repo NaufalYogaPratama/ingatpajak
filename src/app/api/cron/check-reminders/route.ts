@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { addDays, isSameDay, startOfDay } from "date-fns";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_APP_PASSWORD,
+    },
+});
 
 export async function GET(req: NextRequest) {
     // Optional: Check for Cron Secret to prevent unauthorized access
@@ -46,12 +54,12 @@ export async function GET(req: NextRequest) {
 
             if (match) {
                 try {
-                    const { data, error } = await resend.emails.send({
-                        from: "IngatPajak <onauditing@resend.dev>", // Replace with your verified domain in production
-                        to: [vehicle.user.email as string],
+                    await transporter.sendMail({
+                        from: `"IngatPajak" <${process.env.EMAIL_USER}>`,
+                        to: vehicle.user.email as string,
                         subject: `[PENTING] Pengingat Pajak Kendaraan: ${vehicle.plateNumber}`,
                         html: `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 8px;">
+                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
                                 <h1 style="color: #2563eb; font-size: 24px; margin-bottom: 16px;">Halo, ${vehicle.user.name || "Pemilik Kendaraan"}!</h1>
                                 <p style="font-size: 16px; color: #475569; line-height: 1.5;">
                                     Kami ingin menginformasikan bahwa pajak kendaraan Anda akan segera jatuh tempo dalam <strong>${match} hari</strong>.
@@ -72,11 +80,7 @@ export async function GET(req: NextRequest) {
                         `,
                     });
 
-                    if (error) {
-                        results.errors.push(`Error sending to ${vehicle.user.email}: ${error.message}`);
-                    } else {
-                        results.emailsSent++;
-                    }
+                    results.emailsSent++;
                 } catch (err: any) {
                     results.errors.push(`System error for ${vehicle.user.email}: ${err.message}`);
                 }

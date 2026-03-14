@@ -5,6 +5,18 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import nodemailer from "nodemailer";
+import { addMinutes } from "date-fns";
+
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_APP_PASSWORD,
+    },
+});
 
 /**
  * Fetch a user by NIK/NPWP
@@ -105,27 +117,89 @@ export async function toggleNotification(
     }
 }
 /**
- * Login or Register a user
+ * Step 1: Request OTP
  */
-export async function loginUser(nik_npwp: string, phone: string, email: string) {
+export async function requestOtp(nik_npwp: string, email: string) {
     try {
-        // Find or create user
-        let user = await prisma.user.findUnique({
+        // 1. Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = addMinutes(new Date(), 5);
+
+        // 2. Upsert User (Create if doesn't exist)
+        const user = await prisma.user.upsert({
+            where: { nik_npwp },
+            update: {
+                email,
+                otp,
+                otpExpiresAt: expiresAt
+            },
+            create: {
+                nik_npwp,
+                email,
+                otp,
+                otpExpiresAt: expiresAt,
+                name: email.split("@")[0]
+            }
+        });
+
+        // 3. Send Email via Nodemailer
+        await transporter.sendMail({
+            from: `"IngatPajak" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: `[OTP] Kode Verifikasi Login IngatPajak: ${otp}`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <h2 style="color: #2563eb; text-align: center;">Kode OTP Anda</h2>
+                    <p style="text-align: center; font-size: 16px; color: #475569;">Gunakan kode di bawah ini untuk masuk ke akun IngatPajak Anda.</p>
+                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; text-align: center; margin: 24px 0;">
+                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1e293b;">${otp}</span>
+                    </div>
+                    <p style="text-align: center; font-size: 14px; color: #94a3b8;">Kode ini akan kedaluwarsa dalam 5 menit. Jangan bagikan kode ini kepada siapapun.</p>
+                </div>
+            `,
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Request OTP error:", error);
+        return { success: false, error: "Terjadi kesalahan sistem saat meminta OTP." };
+    }
+}
+
+/**
+ * Step 2: Verify OTP and Login
+ */
+export async function verifyOtp(nik_npwp: string, otpCode: string) {
+    try {
+        // 1. Find user by NIK
+        const user = await prisma.user.findUnique({
             where: { nik_npwp }
         });
 
-        if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    nik_npwp,
-                    phone,
-                    email,
-                    name: email.split("@")[0] // Fallback name
-                }
-            });
+        if (!user || !user.otp || !user.otpExpiresAt) {
+            return { success: false, error: "Data OTP tidak ditemukan. Silakan minta ulang." };
         }
 
-        // Create session cookie
+        // 2. Validate OTP and Expiry
+        const now = new Date();
+        if (user.otp !== otpCode) {
+            return { success: false, error: "Kode OTP salah." };
+        }
+
+        if (now > user.otpExpiresAt) {
+            return { success: false, error: "Kode OTP telah kedaluwarsa." };
+        }
+
+        // 3. Validated! Clear OTP fields
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                otp: null,
+                otpExpiresAt: null
+            }
+        });
+
+        // 4. Create Session Cookie
         const cookieStore = await cookies();
         cookieStore.set("auth_session", user.id, {
             httpOnly: true,
@@ -137,9 +211,16 @@ export async function loginUser(nik_npwp: string, phone: string, email: string) 
 
         return { success: true };
     } catch (error) {
-        console.error("Login error:", error);
-        return { success: false, error: "Gagal melakukan login. Silakan cek data Anda." };
+        console.error("Verify OTP error:", error);
+        return { success: false, error: "Terjadi kesalahan saat memverifikasi OTP." };
     }
+}
+
+/**
+ * (Legacy) Login or Register a user
+ */
+export async function loginUser(nik_npwp: string, phone: string, email: string) {
+    return { success: false, error: "Metode login telah diperbarui ke OTP. Silakan gunakan form login yang baru." };
 }
 
 /**

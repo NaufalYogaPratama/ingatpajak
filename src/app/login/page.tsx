@@ -8,29 +8,53 @@ import { Shield, MessageSquare, Smartphone, Mail, CreditCard } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginUser } from "@/lib/actions";
+import { requestOtp, verifyOtp } from "@/lib/actions";
 import { toast } from "sonner";
 
 export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [step, setStep] = useState<"IDENTIFY" | "OTP_VERIFY">("IDENTIFY");
+    const [nik, setNik] = useState("");
+    const [email, setEmail] = useState("");
+    const [otp, setOtp] = useState("");
 
-    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleRequestOtp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
 
         const formData = new FormData(e.currentTarget);
-        const nik = formData.get("nik") as string;
-        const phone = formData.get("phone") as string;
-        const email = formData.get("email") as string;
+        const nikValue = formData.get("nik") as string;
+        const emailValue = formData.get("email") as string;
 
         try {
-            const result = await loginUser(nik, phone, email);
+            const result = await requestOtp(nikValue, emailValue);
+            if (result.success) {
+                setNik(nikValue);
+                setEmail(emailValue);
+                setStep("OTP_VERIFY");
+                toast.success("Kode OTP telah dikirim ke email Anda.");
+            } else {
+                toast.error(result.error || "Gagal mengirim OTP.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        try {
+            const result = await verifyOtp(nik, otp);
             if (result.success) {
                 toast.success("Login berhasil!");
                 router.push("/dashboard");
             } else {
-                toast.error(result.error || "Gagal login.");
+                toast.error(result.error || "Gagal memverifikasi OTP.");
             }
         } catch (error) {
             toast.error("Terjadi kesalahan sistem.");
@@ -54,7 +78,7 @@ export default function LoginPage() {
                             <span className="text-yellow-400 font-black">!</span>P
                         </div>
                         <span className="text-2xl font-bold">ingat</span>
-                        <span className="text-2xl font-bold text-yellow-400 -ml-1">pajak.</span>
+                        <span className="text-2xl font-bold text-yellow-400 -ml-1">Pajak.</span>
                     </div>
 
                     <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 mt-16 max-w-lg">
@@ -76,11 +100,6 @@ export default function LoginPage() {
                             <p className="text-sm text-blue-200">Keamanan setara bank untuk data NPWP Anda</p>
                         </div>
                     </div>
-                    <div className="flex gap-2 mt-4 ml-2">
-                        <div className="w-6 h-1 bg-yellow-400 rounded-full"></div>
-                        <div className="w-2 h-1 bg-blue-400 rounded-full"></div>
-                        <div className="w-2 h-1 bg-blue-400 rounded-full"></div>
-                    </div>
                 </div>
             </div>
 
@@ -96,87 +115,108 @@ export default function LoginPage() {
                         <span className="text-xl font-bold text-yellow-500 -ml-1">Pajak.</span>
                     </div>
 
-                    <div className="mb-8">
-                        <h2 className="text-3xl font-bold text-slate-900 mb-2">Selamat Datang</h2>
-                        <p className="text-slate-500 text-base">Masuk untuk mengakses dashboard pajak Anda.</p>
-                    </div>
+                    {step === "IDENTIFY" ? (
+                        <>
+                            <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 mb-2">Selamat Datang</h2>
+                                <p className="text-slate-500 text-base">Masukkan NIK dan Email untuk menerima kode OTP.</p>
+                            </div>
 
-                    <form onSubmit={handleLogin} className="space-y-5">
-                        <div className="space-y-2">
-                            <Label htmlFor="nik" className="text-sm font-medium text-slate-700">NIK / NPWP</Label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                                    <CreditCard className="h-4 w-4" />
+                            <form key="identify-form" onSubmit={handleRequestOtp} className="space-y-5">
+                                <div className="space-y-2">
+                                    <Label htmlFor="nik" className="text-sm font-medium text-slate-700">NIK / NPWP</Label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                            <CreditCard className="h-4 w-4" />
+                                        </div>
+                                        <Input
+                                            id="nik"
+                                            name="nik"
+                                            placeholder="Masukkan 16 digit NIK atau 15 digit NPWP"
+                                            className="pl-10 h-12 bg-slate-50/50 border-slate-200"
+                                            value={nik}
+                                            onChange={(e) => setNik(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <Input
-                                    id="nik"
-                                    name="nik"
-                                    placeholder="Masukkan 16 digit NIK atau 15 digit NPWP"
-                                    className="pl-10 h-12 bg-slate-50/50 border-slate-200"
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-sm font-medium text-slate-700">Nomor HP Aktif</Label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                                    <Smartphone className="h-4 w-4" />
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email Utama</Label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                            <Mail className="h-4 w-4" />
+                                        </div>
+                                        <Input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            placeholder="nama@email.com"
+                                            className="pl-10 h-12 bg-slate-50/50 border-slate-200"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <Input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    placeholder="Contoh: 08123456789"
-                                    className="pl-10 h-12 bg-slate-50/50 border-slate-200"
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                                    <Mail className="h-4 w-4" />
+                                <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                                    {isLoading ? "Mengirim OTP..." : "Kirim Kode OTP"}
+                                </Button>
+                            </form>
+                        </>
+                    ) : (
+                        <>
+                            <div className="mb-8">
+                                <h2 className="text-3xl font-bold text-slate-900 mb-2">Verifikasi OTP</h2>
+                                <p className="text-slate-500 text-base flex flex-col">
+                                    <span>Kode telah dikirim ke:</span>
+                                    <span className="font-semibold text-slate-900">{email}</span>
+                                </p>
+                            </div>
+
+                            <form key="otp-form" onSubmit={handleVerifyOtp} className="space-y-5">
+                                <div className="space-y-2">
+                                    <Label htmlFor="otp" className="text-sm font-medium text-slate-700">6 Digit Kode OTP</Label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                            <Shield className="h-4 w-4" />
+                                        </div>
+                                        <Input
+                                            id="otp"
+                                            name="otp"
+                                            placeholder="000000"
+                                            maxLength={6}
+                                            className="pl-10 h-12 bg-slate-50/50 border-slate-200 tracking-[0.5em] font-mono text-lg"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                                            required
+                                            autoFocus
+                                        />
+                                    </div>
                                 </div>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="nama@email.com"
-                                    className="pl-10 h-12 bg-slate-50/50 border-slate-200"
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-                            {isLoading ? "Memproses..." : "Masuk / Daftar"}
-                        </Button>
+                                <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                                    {isLoading ? "Memverifikasi..." : "Verifikasi & Masuk"}
+                                </Button>
 
-                        <div className="relative py-4">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-slate-200" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-3 text-slate-400">Atau masuk dengan</span>
-                            </div>
-                        </div>
+                                <button
+                                    type="button"
+                                    className="w-full text-sm text-blue-600 font-medium hover:underline py-2"
+                                    onClick={() => setStep("IDENTIFY")}
+                                >
+                                    Ganti NIK / Email
+                                </button>
+                            </form>
+                        </>
+                    )}
 
-                        <Button type="button" variant="outline" className="w-full h-12 text-slate-600 border-slate-200 hover:bg-slate-50 font-medium">
-                            <MessageSquare className="mr-2 h-4 w-4 text-slate-500" />
-                            Login via Kode OTP
-                        </Button>
-                    </form>
-
-                    <div className="mt-8 bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex gap-3 pb-4">
+                    <div className="mt-8 bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex gap-3">
                         <Shield className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                         <div>
                             <p className="font-semibold text-sm text-blue-900 mb-1">PRIVASI TERJAMIN</p>
                             <p className="text-xs text-blue-700/80 leading-relaxed">
-                                IngatPajak menjamin kerahasiaan data pribadi Anda sesuai regulasi yang berlaku. Data hanya digunakan untuk keperluan verifikasi pajak.
+                                IngatPajak menjamin kerahasiaan data pribadi Anda. OTP dikirimkan secara langsung ke email anda untuk keamanan tambahan.
                             </p>
                         </div>
                     </div>
