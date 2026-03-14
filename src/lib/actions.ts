@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 /**
  * Fetch a user by NIK/NPWP
@@ -239,5 +240,99 @@ export async function deleteVehicle(vehicleId: string) {
     } catch (error) {
         console.error("Error deleting vehicle:", error);
         return { success: false, error: "Gagal menghapus kendaraan." };
+    }
+}
+
+/**
+ * Upload a tax payment proof to Supabase and update the record
+ */
+export async function uploadTaxProof(historyId: string, formData: FormData) {
+    try {
+        const file = formData.get("file") as File;
+        if (!file) return { success: false, error: "Tidak ada file yang dipilih." };
+
+        // 1. Upload to Supabase Storage
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${historyId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `proofs/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("documents")
+            .upload(filePath, file);
+
+        if (uploadError) {
+            console.error("Supabase upload error:", uploadError);
+            return { success: false, error: "Gagal mengunggah file ke storage." };
+        }
+
+        // 2. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from("documents")
+            .getPublicUrl(filePath);
+
+        // 3. Update Prisma record
+        await prisma.taxHistory.update({
+            where: { id: historyId },
+            data: { proofUrl: publicUrl }
+        });
+
+        revalidatePath("/dashboard/history");
+        revalidatePath("/dashboard");
+
+        return { success: true, url: publicUrl };
+    } catch (error) {
+        console.error("Error uploading tax proof:", error);
+        return { success: false, error: "Terjadi kesalahan saat menyimpan bukti." };
+    }
+}
+
+/**
+ * Mark a vehicle tax as paid, update its due date, and create a history record.
+ */
+export async function markAsPaid(vehicleId: string) {
+    try {
+        const user = await getCurrentUser();
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        const vehicle = await prisma.vehicle.findUnique({
+            where: { id: vehicleId }
+        });
+
+        if (!vehicle || vehicle.userId !== user.id) {
+            return { success: false, error: "Kendaraan tidak ditemukan." };
+        }
+
+        const currentDueDate = new Date(vehicle.taxDueDate);
+        const nextDueDate = new Date(currentDueDate);
+        nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+
+        // Transaction to ensure both update and create happen
+        await prisma.$transaction([
+            // 1. Create Tax History
+            prisma.taxHistory.create({
+                data: {
+                    vehicleId: vehicle.id,
+                    taxYear: currentDueDate.getFullYear(),
+                    amount: vehicle.estimatedCost,
+                    status: "Lunas",
+                }
+            }),
+            // 2. Update Vehicle next due date
+            prisma.vehicle.update({
+                where: { id: vehicle.id },
+                data: {
+                    taxDueDate: nextDueDate
+                }
+            })
+        ]);
+
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/history");
+        revalidatePath("/dashboard/calendar");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error marking as paid:", error);
+        return { success: false, error: "Gagal memperbarui status pembayaran." };
     }
 }

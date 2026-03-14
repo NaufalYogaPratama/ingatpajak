@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, Download, FileText, CheckCircle2, History as HistoryIcon, AlertCircle, Trash2 } from "lucide-react";
+import { Car, Download, FileText, CheckCircle2, History as HistoryIcon, AlertCircle, Trash2, Upload, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +18,9 @@ import { toast } from "sonner";
 import { User, Vehicle, TaxHistory } from "@prisma/client";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { deleteVehicle } from "@/lib/actions";
+import { deleteVehicle, uploadTaxProof, markAsPaid } from "@/lib/actions";
 import AddVehicleModal from "@/components/vehicles/AddVehicleModal";
+import { useRef } from "react";
 
 interface HistoryClientProps {
     user: User;
@@ -31,6 +32,10 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
     const [selectedVehicleId, setSelectedVehicleId] = useState("all");
 
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState<string | null>(null);
+    const [isUpdating, setIsUpdating] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
 
     const filteredHistory = selectedVehicleId === "all"
         ? taxHistories
@@ -56,6 +61,55 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
             toast.error("Terjadi kesalahan sistem.");
         } finally {
             setIsDeleting(null);
+        }
+    }
+
+    async function handleUpload(historyId: string, event: React.ChangeEvent<HTMLInputElement>) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(historyId);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const result = await uploadTaxProof(historyId, formData);
+            if (result.success) {
+                toast.success("Bukti pajak berhasil diunggah!");
+            } else {
+                toast.error(result.error || "Gagal mengunggah bukti.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem saat mengunggah.");
+        } finally {
+            setIsUploading(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    }
+
+    const triggerUpload = (historyId: string) => {
+        setActiveHistoryId(historyId);
+        fileInputRef.current?.click();
+    };
+
+    async function handleMarkAsPaid(vehicleId: string) {
+        if (!confirm("Apakah Anda yakin ingin menandai pajak ini sebagai lunas?")) return;
+
+        setIsUpdating(vehicleId);
+        try {
+            const result = await markAsPaid(vehicleId);
+            if (result.success) {
+                toast.success("Status pajak berhasil diperbarui ke tahun depan!");
+                if (selectedVehicleId === vehicleId) {
+                    setSelectedVehicleId("all");
+                }
+            } else {
+                toast.error(result.error || "Gagal memperbarui status pajak.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem.");
+        } finally {
+            setIsUpdating(null);
         }
     }
 
@@ -216,15 +270,33 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-slate-400 hover:text-blue-600"
-                                                        title="Unduh TBPKP"
-                                                        onClick={() => toast("Fitur Unduh TBPKP akan segera hadir!")}
-                                                    >
-                                                        <FileText className="h-4 w-4" />
-                                                    </Button>
+                                                    {history.proofUrl ? (
+                                                        <Button
+                                                            render={<a href={history.proofUrl} target="_blank" rel="noopener noreferrer" />}
+                                                            nativeButton={false}
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                                            title="Lihat Bukti Pajak"
+                                                        >
+                                                            <ExternalLink className="h-4 w-4" />
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-slate-400 hover:text-blue-600"
+                                                            title="Unggah Bukti"
+                                                            disabled={isUploading === history.id}
+                                                            onClick={() => triggerUpload(history.id)}
+                                                        >
+                                                            {isUploading === history.id ? (
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                            ) : (
+                                                                <Upload className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    )}
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -271,10 +343,26 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                 <Button
                                     nativeButton={false}
                                     render={<a href="https://website.bapenda.jatengprov.go.id/page/new_sakpole" target="_blank" rel="noopener noreferrer" />}
-                                    className="w-full bg-blue-600 hover:bg-blue-700"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 h-10 shadow-md shadow-blue-600/20"
                                 >
                                     Bayar Sekarang (E-Samsat)
                                 </Button>
+
+                                {firstVehicle && (
+                                    <Button
+                                        variant="outline"
+                                        className="w-full mt-3 h-10 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-emerald-600 hover:border-emerald-200 transition-all"
+                                        onClick={() => handleMarkAsPaid(firstVehicle.id)}
+                                        disabled={isUpdating === firstVehicle.id}
+                                    >
+                                        {isUpdating === firstVehicle.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        ) : (
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        )}
+                                        Tandai Lunas
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -296,9 +384,28 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                                 <p className="text-xs text-slate-400 mt-0.5">PDF • 1.2 MB</p>
                                             </div>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0" onClick={() => toast("Fitur Unduh akan segera hadir!")}>
-                                            <Download className="h-4 w-4" />
-                                        </Button>
+                                        {history.proofUrl ? (
+                                            <Button
+                                                render={<a href={history.proofUrl} target="_blank" rel="noopener noreferrer" />}
+                                                nativeButton={false}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0"
+                                                title="Unduh Bukti"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-slate-400 group-hover:text-blue-600 h-8 w-8 shrink-0"
+                                                title="Belum Ada Bukti"
+                                                onClick={() => triggerUpload(history.id)}
+                                            >
+                                                <Upload className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                     </div>
                                 ))}
 
@@ -309,6 +416,15 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                         </Card>
                     </div>
                 </div>
+
+                {/* Hidden File Input for Uploads */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept=".pdf,image/*"
+                    onChange={(e) => activeHistoryId && handleUpload(activeHistoryId, e)}
+                />
             </div>
         </div>
     );

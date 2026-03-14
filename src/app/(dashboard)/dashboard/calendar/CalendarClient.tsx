@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronLeft, ChevronRight, RefreshCw, Car, Calendar as CalendarIcon, Info, ShieldCheck, Mail, MessageSquare, ArrowRight, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, Car, Calendar as CalendarIcon, Info, ShieldCheck, Mail, MessageSquare, ArrowRight, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { User, Vehicle } from "@prisma/client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay } from "date-fns";
 import { id } from "date-fns/locale";
-import { toggleNotification } from "@/lib/actions";
+import { toggleNotification, markAsPaid } from "@/lib/actions";
 
 interface CalendarClientProps {
     user: User;
@@ -54,6 +54,26 @@ export default function CalendarClient({ user, vehicles }: CalendarClientProps) 
             }
         });
     };
+
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    async function handleMarkAsPaid(vehicleId: string) {
+        if (!confirm("Apakah Anda yakin ingin menandai pajak ini sebagai lunas?")) return;
+
+        setIsUpdating(true);
+        try {
+            const result = await markAsPaid(vehicleId);
+            if (result.success) {
+                toast.success("Status pajak berhasil diperbarui ke tahun depan!");
+            } else {
+                toast.error(result.error || "Gagal memperbarui status pajak.");
+            }
+        } catch (error) {
+            toast.error("Terjadi kesalahan sistem.");
+        } finally {
+            setIsUpdating(false);
+        }
+    }
 
     return (
         <div className="flex flex-col xl:flex-row gap-6">
@@ -184,9 +204,23 @@ export default function CalendarClient({ user, vehicles }: CalendarClientProps) 
                         <Button
                             nativeButton={false}
                             render={<a href="https://website.bapenda.jatengprov.go.id/page/new_sakpole" target="_blank" rel="noopener noreferrer" />}
-                            className="w-full bg-blue-600 hover:bg-blue-700"
+                            className="w-full bg-blue-600 hover:bg-blue-700 h-10 shadow-md shadow-blue-600/20"
                         >
                             Bayar Sekarang (E-Samsat)
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            className="w-full mt-3 h-10 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-emerald-600 hover:border-emerald-200 transition-all"
+                            onClick={() => handleMarkAsPaid(selectedVehicle.id)}
+                            disabled={isUpdating}
+                        >
+                            {isUpdating ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                            )}
+                            Tandai Lunas
                         </Button>
 
                         {/* Notifications Section */}

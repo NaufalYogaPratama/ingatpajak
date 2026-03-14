@@ -12,6 +12,8 @@ model User {
   name      String?
   phone     String?
   email     String?
+  otp       String?
+  otpExpiresAt DateTime?
   createdAt DateTime  @default(now())
   vehicles  Vehicle[]
 }
