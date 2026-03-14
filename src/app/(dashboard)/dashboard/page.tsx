@@ -40,7 +40,7 @@ export default async function DashboardPage() {
             <section>
                 <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 mb-6">
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">
-                        Selamat Pagi, {firstName}!
+                        Selamat Datang, {firstName}!
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <p className="text-slate-600 leading-relaxed max-w-2xl">

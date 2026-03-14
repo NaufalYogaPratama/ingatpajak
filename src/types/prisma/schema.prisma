@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  nik_npwp     String    @unique
+  name         String?
+  phone        String?
+  email        String?
+  otp          String?
+  otpExpiresAt DateTime?
+  createdAt    DateTime  @default(now())
+  vehicles     Vehicle[]
+}
+
+model Vehicle {
+  id              String       @id @default(uuid())
+  userId          String
+  plateNumber     String       @unique
+  type            String
+  brandModel      String
+  manufactureYear Int
+  taxDueDate      DateTime
+  estimatedCost   Float
+  isWaActive      Boolean      @default(false)
+  isEmailActive   Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  user            User         @relation(fields: [userId], references: [id])
+  taxHistories    TaxHistory[]
+}
+
+model TaxHistory {
+  id        String   @id @default(uuid())
+  vehicleId String
+  taxYear   Int
+  amount    Float
+  status    String
+  proofUrl  String?
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+}

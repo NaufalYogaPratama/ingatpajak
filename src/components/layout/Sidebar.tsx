@@ -17,13 +17,14 @@ export function Sidebar() {
     return (
         <aside className="hidden w-64 flex-col border-r bg-card md:flex">
             <div className="flex h-16 items-center px-6 border-b">
-                <Link href="/dashboard" className="flex items-center gap-2">
-                    {/* A simple logo placeholder using primary colors */}
-                    <div className="flex bg-primary text-primary-foreground font-bold p-1 rounded-md text-xl">
+                <Link href="/dashboard" className="flex items-center gap-2 group">
+                    <div className="flex bg-primary text-primary-foreground font-bold rounded-lg text-xl w-9 h-9 items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105">
                         <span className="text-secondary">!</span>P
                     </div>
-                    <span className="text-xl font-bold text-primary">ingat</span>
-                    <span className="text-xl font-bold text-secondary -ml-1">Pajak.</span>
+                    <div className="flex flex-col -space-y-1">
+                        <span className="text-sm font-bold text-primary tracking-tight leading-none pt-1">ingat</span>
+                        <span className="text-sm font-bold text-secondary tracking-tight leading-none">Pajak.</span>
+                    </div>
                 </Link>
             </div>
             <nav className="flex-1 space-y-2 p-4">

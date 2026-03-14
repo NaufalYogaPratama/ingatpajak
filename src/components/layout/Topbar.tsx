@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { logoutUser } from "@/lib/actions";
 import { navigationLinks } from "./Sidebar";
 import { cn } from "@/lib/utils";
 import type { User as UserType } from "@prisma/client";
@@ -36,11 +37,13 @@ export function Topbar({ user }: TopbarProps) {
                 <SheetContent side="left" className="w-64">
                     <SheetTitle className="sr-only">Menu</SheetTitle>
                     <div className="flex items-center gap-2 mb-8">
-                        <div className="flex bg-primary text-primary-foreground font-bold p-1 rounded-md text-xl">
+                        <div className="flex bg-primary text-primary-foreground font-bold rounded-lg text-xl w-9 h-9 items-center justify-center shrink-0 shadow-sm">
                             <span className="text-secondary">!</span>P
                         </div>
-                        <span className="text-xl font-bold text-primary">ingat</span>
-                        <span className="text-xl font-bold text-secondary -ml-1">Pajak.</span>
+                        <div className="flex flex-col -space-y-1">
+                            <span className="text-sm font-bold text-primary tracking-tight leading-none pt-1">ingat</span>
+                            <span className="text-sm font-bold text-secondary tracking-tight leading-none">Pajak.</span>
+                        </div>
                     </div>
                     <nav className="grid gap-2">
                         {navigationLinks.map((item) => {
@@ -100,7 +103,10 @@ export function Topbar({ user }: TopbarProps) {
                         <DropdownMenuItem>Pengaturan Profil</DropdownMenuItem>
                         <DropdownMenuItem>Bantuan</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive focus:text-destructive">
+                        <DropdownMenuItem
+                            className="text-destructive focus:text-destructive cursor-pointer"
+                            onClick={() => logoutUser()}
+                        >
                             Keluar
                         </DropdownMenuItem>
                     </DropdownMenuContent>

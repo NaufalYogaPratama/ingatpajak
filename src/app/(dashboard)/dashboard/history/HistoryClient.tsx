@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
     Table,
     TableBody,
@@ -239,37 +240,53 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="flex-1 p-0 overflow-x-auto">
+                        <div className="flex-1 px-6 pb-6 pt-0 overflow-x-auto">
                             <Table>
                                 <TableHeader className="bg-slate-50/50">
                                     <TableRow className="hover:bg-transparent border-slate-100">
-                                        <TableHead className="w-[100px] font-semibold text-slate-600">TAHUN PAJAK</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">KENDARAAN</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">NOMINAL TOTAL</TableHead>
-                                        <TableHead className="font-semibold text-slate-600">STATUS</TableHead>
-                                        <TableHead className="w-[120px] text-right font-semibold text-slate-600">AKSI</TableHead>
+                                        <TableHead className="w-[120px] font-bold text-slate-500 text-[11px] uppercase tracking-wider py-4">Tahun Pajak</TableHead>
+                                        <TableHead className="font-bold text-slate-500 text-[11px] uppercase tracking-wider py-4">Kendaraan</TableHead>
+                                        <TableHead className="font-bold text-slate-500 text-[11px] uppercase tracking-wider py-4">Nominal Total</TableHead>
+                                        <TableHead className="font-bold text-slate-500 text-[11px] uppercase tracking-wider py-4">Status</TableHead>
+                                        <TableHead className="w-[140px] text-right font-bold text-slate-500 text-[11px] uppercase tracking-wider py-4">Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {filteredHistory.map((history) => (
                                         <TableRow key={history.id} className="border-slate-100 hover:bg-slate-50/50">
-                                            <TableCell className="font-medium text-slate-900">{history.taxYear}</TableCell>
-                                            <TableCell>
+                                            <TableCell className="font-bold text-slate-900 py-5">{history.taxYear}</TableCell>
+                                            <TableCell className="py-5">
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium text-slate-900">{history.vehicle.brandModel}</span>
-                                                    <span className="text-xs text-slate-500 mt-0.5">{history.vehicle.plateNumber}</span>
+                                                    <span className="font-bold text-slate-800 leading-tight">{history.vehicle.brandModel}</span>
+                                                    <span className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">{history.vehicle.plateNumber}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <span className="font-semibold text-slate-700">Rp {history.amount.toLocaleString('id-ID')}</span>
+                                            <TableCell className="py-5">
+                                                <span className="font-bold text-slate-800 tracking-tight">Rp {history.amount.toLocaleString('id-ID')}</span>
                                             </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline" className={`${history.status === "Lunas" || history.status === "LUNAS" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}>
-                                                    {history.status}
+                                            <TableCell className="py-5">
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "px-2.5 py-0.5 rounded-full font-bold text-[10px] border-none",
+                                                        (history.status === "Lunas" || history.status === "LUNAS")
+                                                            ? "bg-emerald-50 text-emerald-600"
+                                                            : "bg-red-50 text-red-600"
+                                                    )}
+                                                >
+                                                    {history.status === "Lunas" || history.status === "LUNAS" ? (
+                                                        <span className="flex items-center gap-1">
+                                                            <CheckCircle2 className="h-3 w-3" /> Lunas
+                                                        </span>
+                                                    ) : (
+                                                        <span className="flex items-center gap-1">
+                                                            <AlertCircle className="h-3 w-3" /> Belum Bayar
+                                                        </span>
+                                                    )}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
+                                            <TableCell className="text-right py-5">
+                                                <div className="flex justify-end gap-3">
                                                     {history.proofUrl ? (
                                                         <Button
                                                             render={<a href={history.proofUrl} target="_blank" rel="noopener noreferrer" />}

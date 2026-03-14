@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import type { Prisma, User } from "../types/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -23,7 +24,7 @@ const transporter = nodemailer.createTransport({
  */
 export async function getUserByNikNpwp(nik_npwp: string) {
     try {
-        const user = await prisma.user.findUnique({
+        const user: User | null = await prisma.user.findUnique({
             where: { nik_npwp }
         });
         return { success: true, data: user };
@@ -126,20 +127,20 @@ export async function requestOtp(nik_npwp: string, email: string) {
         const expiresAt = addMinutes(new Date(), 5);
 
         // 2. Upsert User (Create if doesn't exist)
-        const user = await prisma.user.upsert({
+        const user: User = await prisma.user.upsert({
             where: { nik_npwp },
             update: {
                 email,
                 otp,
                 otpExpiresAt: expiresAt
-            },
+            } as Prisma.UserUpdateInput,
             create: {
                 nik_npwp,
                 email,
                 otp,
                 otpExpiresAt: expiresAt,
                 name: email.split("@")[0]
-            }
+            } as Prisma.UserCreateInput
         });
 
         // 3. Send Email via Nodemailer
@@ -172,7 +173,7 @@ export async function requestOtp(nik_npwp: string, email: string) {
 export async function verifyOtp(nik_npwp: string, otpCode: string) {
     try {
         // 1. Find user by NIK
-        const user = await prisma.user.findUnique({
+        const user: User | null = await prisma.user.findUnique({
             where: { nik_npwp }
         });
 

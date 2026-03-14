@@ -1,4 +1,4 @@
-export interface User {
+export interface MockUser {
     id: string;
     name: string;
     nik: string;
@@ -7,7 +7,7 @@ export interface User {
     email: string;
 }
 
-export interface Vehicle {
+export interface MockVehicle {
     id: string;
     type: "Mobil" | "Motor";
     brand: string;
@@ -26,7 +26,7 @@ export interface Vehicle {
     };
 }
 
-export interface TaxHistory {
+export interface MockTaxHistory {
     id: string;
     year: number;
     vehicleId: string;
@@ -59,7 +59,7 @@ export interface NewsArticle {
 // MOCK DATA INSTANCES
 // ==========================================
 
-export const mockUser: User = {
+export const mockUser: MockUser = {
     id: "u1",
     name: "Nabil Subagja",
     nik: "3319012345678901",
@@ -68,7 +68,7 @@ export const mockUser: User = {
     email: "nabil@example.com",
 };
 
-export const mockVehicles: Vehicle[] = [
+export const mockVehicles: MockVehicle[] = [
     {
         id: "v1",
         type: "Mobil",
@@ -125,7 +125,7 @@ export const mockVehicles: Vehicle[] = [
     },
 ];
 
-export const mockTaxHistories: TaxHistory[] = [
+export const mockTaxHistories: MockTaxHistory[] = [
     {
         id: "th1",
         year: 2022,
