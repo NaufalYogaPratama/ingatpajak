@@ -2,16 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Menu, User as UserIcon, Home, Calendar, Clock } from "lucide-react";
+import { Bell, Menu, User as UserIcon, Home, Calendar, Clock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { logoutUser } from "@/lib/actions";
@@ -114,43 +106,32 @@ export function Topbar({ user }: TopbarProps) {
 
                 {/* Right Side: Actions & Profile */}
                 <div className="flex items-center justify-end gap-3 flex-1">
-                    <Button variant="ghost" size="icon" className="rounded-full relative">
+                    {/* <Button variant="ghost" size="icon" className="rounded-full relative">
                         <Bell className="h-5 w-5" />
                         <span className="sr-only">Notifications</span>
                         <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
-                    </Button>
+                    </Button> */}
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-10 w-auto flex items-center gap-3 rounded-full hover:bg-muted/50 pl-2 pr-4" />}>
-                            <div className="hidden md:flex flex-col items-end">
-                                <span className="text-sm font-semibold truncate max-w-[120px]">{user.name}</span>
-                                <span className="text-[10px] text-muted-foreground opacity-70">Wajib Pajak</span>
+                    <div className="flex items-center gap-4 pl-4 border-l border-slate-100 ml-2">
+                        <div className="flex items-center gap-3">
+                            <div className="hidden md:flex flex-col items-end leading-tight">
+                                <span className="text-[13px] font-bold text-slate-700 truncate max-w-[120px]">{user.name}</span>
+                                <span className="text-[10px] text-slate-400 font-medium">Wajib Pajak</span>
                             </div>
-                            <Avatar className="h-8 w-8 bg-primary">
-                                <AvatarFallback className="text-primary-foreground bg-primary">{initials}</AvatarFallback>
+                            <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100">
+                                <AvatarFallback className="text-primary-foreground bg-primary text-xs font-bold leading-none">{initials}</AvatarFallback>
                             </Avatar>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end">
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                                    <p className="text-xs leading-none text-muted-foreground">
-                                        {user.email}
-                                    </p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Pengaturan Profil</DropdownMenuItem>
-                            <DropdownMenuItem>Bantuan</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                className="text-destructive focus:text-destructive cursor-pointer"
-                                onClick={() => logoutUser()}
-                            >
-                                Keluar
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-full text-slate-400 hover:text-destructive hover:bg-destructive/5 transition-all duration-200"
+                            onClick={() => logoutUser()}
+                            title="Keluar"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </div>
         </header>
