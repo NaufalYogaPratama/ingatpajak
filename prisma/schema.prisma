@@ -27,8 +27,8 @@ model Vehicle {
   manufactureYear Int
   taxDueDate      DateTime
   estimatedCost   Float
-  isWaActive      Boolean      @default(false)
-  isEmailActive   Boolean      @default(false)
+  isWaActive      Boolean      @default(true)
+  isEmailActive   Boolean      @default(true)
   createdAt       DateTime     @default(now())
   user            User         @relation(fields: [userId], references: [id])
   taxHistories    TaxHistory[]

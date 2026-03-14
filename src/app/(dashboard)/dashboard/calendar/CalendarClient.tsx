@@ -2,7 +2,23 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, RefreshCw, Car, Calendar as CalendarIcon, Info, ShieldCheck, Mail, MessageSquare, ArrowRight, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import {
+    ChevronLeft,
+    ChevronRight,
+    RefreshCw,
+    Car,
+    Calendar as CalendarIcon,
+    Info,
+    ShieldCheck,
+    Mail,
+    MessageSquare,
+    ArrowRight,
+    AlertTriangle,
+    CheckCircle2,
+    Loader2,
+    FileText,
+    AlertCircle
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,11 +113,11 @@ export default function CalendarClient({ user, vehicles, taxHistories }: Calenda
             {/* Left Area - Calendar Grid */}
             <div className="flex-1 space-y-4">
                 <h1 className="text-2xl md:text-xl text-slate-500 mb-3">
-                        Kalender IngatPajak
-                    </h1>
+                    Kalender IngatPajak
+                </h1>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-100 gap-4 mb-2">
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        
+
                         <div className="flex items-center gap-2">
                             <Select
                                 value={currentMonth.getMonth().toString()}
@@ -274,6 +290,37 @@ export default function CalendarClient({ user, vehicles, taxHistories }: Calenda
                                     <span className="text-blue-600 font-bold">Estimasi</span>
                                     <span className="font-bold text-blue-600 text-lg">Rp {vehicle.estimatedCost.toLocaleString('id-ID')}</span>
                                 </div>
+
+                                {/* Notification Toggles */}
+                                <div className="space-y-4 mb-6 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                                                <Mail className="h-4 w-4 text-blue-500" /> Pengingat Email
+                                            </div>
+                                            <span className="text-[10px] text-slate-400">Notifikasi 30, 7, 3, 1 hari</span>
+                                        </div>
+                                        <Switch
+                                            checked={vehicle.isEmailActive}
+                                            onCheckedChange={(val) => handleToggle(vehicle.id, "email", val)}
+                                            disabled={isPending}
+                                        />
+                                    </div>
+                                    {/* <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                                                <MessageSquare className="h-4 w-4 text-emerald-500" /> Pengingat WhatsApp
+                                            </div>
+                                            <span className="text-[10px] text-slate-400">Integrasi WA API</span>
+                                        </div>
+                                        <Switch
+                                            checked={vehicle.isWaActive}
+                                            onCheckedChange={(val) => handleToggle(vehicle.id, "wa", val)}
+                                            disabled={isPending}
+                                        />
+                                    </div> */}
+                                </div>
+
                                 <div className="space-y-3">
                                     <Button
                                         nativeButton={false}

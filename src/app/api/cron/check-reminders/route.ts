@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import nodemailer from "nodemailer";
-import { addDays, isSameDay, startOfDay } from "date-fns";
+import { differenceInCalendarDays, startOfDay } from "date-fns";
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -14,16 +14,17 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function GET(req: NextRequest) {
-    // Optional: Check for Cron Secret to prevent unauthorized access
-    // if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-    //     return new NextResponse("Unauthorized", { status: 401 });
-    // }
-
     try {
-        const today = startOfDay(new Date());
-        const daysToCheck = [30, 7, 1];
+        // Use Asia/Jakarta time for "today"
+        const now = new Date();
+        const jakartaNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+        const today = startOfDay(jakartaNow);
 
-        // Fetch all vehicles with email notifications enabled
+        // thresholds to notify: Exactly 30 days OR anywhere within the next 7 days [0-7]
+        // This range-based logic makes testing much easier!
+        const isWithinUpcomingWeek = (days: number) => days >= 0 && days <= 7;
+        const isFarWarning = (days: number) => days === 30;
+
         const vehicles = await prisma.vehicle.findMany({
             where: {
                 isEmailActive: true,
@@ -40,19 +41,26 @@ export async function GET(req: NextRequest) {
             totalChecked: vehicles.length,
             emailsSent: 0,
             skipped: 0,
-            errors: [] as string[]
+            errors: [] as string[],
+            debugDetails: [] as any[]
         };
 
         for (const vehicle of vehicles) {
             const dueDate = startOfDay(new Date(vehicle.taxDueDate));
 
-            // Check if due date matches any of our thresholds
-            const match = daysToCheck.find(days => {
-                const targetDate = addDays(today, days);
-                return isSameDay(dueDate, targetDate);
+            // Calculate difference in calendar days
+            const daysRemaining = differenceInCalendarDays(dueDate, today);
+
+            const shouldNotify = isFarWarning(daysRemaining) || isWithinUpcomingWeek(daysRemaining);
+
+            results.debugDetails.push({
+                plate: vehicle.plateNumber,
+                dueDate: vehicle.taxDueDate.toISOString(),
+                daysRemaining,
+                shouldNotify
             });
 
-            if (match) {
+            if (shouldNotify) {
                 try {
                     await transporter.sendMail({
                         from: `"IngatPajak" <${process.env.EMAIL_USER}>`,
@@ -62,7 +70,7 @@ export async function GET(req: NextRequest) {
                             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
                                 <h1 style="color: #2563eb; font-size: 24px; margin-bottom: 16px;">Halo, ${vehicle.user.name || "Pemilik Kendaraan"}!</h1>
                                 <p style="font-size: 16px; color: #475569; line-height: 1.5;">
-                                    Kami ingin menginformasikan bahwa pajak kendaraan Anda akan segera jatuh tempo dalam <strong>${match} hari</strong>.
+                                    Pajak kendaraan Anda akan segera jatuh tempo dalam <strong>${daysRemaining === 0 ? "Hari Ini" : daysRemaining + " hari"}</strong>.
                                 </p>
                                 <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; margin: 24px 0;">
                                     <p style="margin: 0; font-size: 14px; color: #64748b;">Detail Kendaraan:</p>
@@ -82,7 +90,7 @@ export async function GET(req: NextRequest) {
 
                     results.emailsSent++;
                 } catch (err: any) {
-                    results.errors.push(`System error for ${vehicle.user.email}: ${err.message}`);
+                    results.errors.push(`Error for ${vehicle.plateNumber}: ${err.message}`);
                 }
             } else {
                 results.skipped++;
