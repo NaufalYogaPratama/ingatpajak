@@ -194,7 +194,7 @@ export const mockNewsArticles: NewsArticle[] = [
         id: "n2",
         title: "Digitalisasi Pajak: Mudah Bayar Pajak Kendaraan",
         date: "05 Okt 2023",
-        category: "Digital",
+        category: "Kebijakan",
         description: "Tak perlu antre lagi di Samsat. Pelajari bagaimana sistem online dapat menghemat waktu berharga Anda.",
         url: "#",
     },

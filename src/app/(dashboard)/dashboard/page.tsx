@@ -165,16 +165,16 @@ export default async function DashboardPage() {
                             <CardContent className="p-5 flex-1 flex flex-col">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                     <CalendarIcon className="h-3 w-3 text-yellow-500" />
-                                    1 Oktober 2025
+                                    24 Februari 2026
                                 </div>
                                 <h3 className="font-bold text-slate-900 leading-tight mb-2">
-                                    Pemdaprov Jabar Akhiri Program Pemutihan Pajak Kendaraan Bermotor
+                                    Tidak Ada Tarif Baru PKB 2026, Perbedaan Nominal Dipengaruhi Diskon
                                 </h3>
                                 <p className="text-sm text-slate-600 line-clamp-2 mb-4 flex-1">
-                                    Pemerintah Provinsi Jawa Barat resmi mengakhiri program pemutihan denda Pajak Kendaraan Bermotor (PKB). Mulai Oktober 2025, pembayaran pajak kembali mengikuti aturan normal yang berlaku.
+                                    Pemprov Jawa Tengah memastikan tidak ada kenaikan tarif Pajak Kendaraan Bermotor (PKB) di tahun 2026 akibat kebijakan Opsen. Perbedaan tagihan murni karena adanya relaksasi diskon 5%.
                                 </p>
                                 <Link
-                                    href="https://www.jabarprov.go.id/en/berita/pemdaprov-jabar-akhiri-program-pemutihan-pajak-kendaraan-bermotor-21287"
+                                    href="https://jatengprov.go.id/beritadaerah/tidak-ada-tarif-baru-pkb-2026-perbedaan-nominal-dipengaruhi-diskon/"
                                     target="_blank"
                                     className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800 self-start mt-auto"
                                 >
@@ -217,16 +217,16 @@ export default async function DashboardPage() {
                             <div className="p-5 sm:p-6 flex flex-col justify-center sm:w-3/5">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                     <CalendarIcon className="h-3 w-3 text-yellow-500" />
-                                    4 Juni 2026
+                                    27 Februari 2026
                                 </div>
                                 <h3 className="font-bold text-lg text-slate-900 leading-tight mb-2">
-                                    Polri Luncurkan BPKB Elektronik (e-BPKB) Khusus Mobil Baru
+                                    Berlaku 2026, Pajak Tahunan Kendaraan Jenis Ini Turun Drastis!
                                 </h3>
                                 <p className="text-sm text-slate-600 line-clamp-3 mb-4">
-                                    Korlantas Polri mulai mengimplementasikan Buku Pemilik Kendaraan Bermotor elektronik (e-BPKB). Untuk tahap awal, digitalisasi dokumen ini baru dikhususkan bagi kendaraan roda empat keluaran terbaru.
+                                    Kabar baik! Mulai 2026, terdapat keringanan drastis untuk PKB dan BBNKB khusus bagi kendaraan angkutan umum (orang maupun barang) yang sudah memiliki izin dan berbadan hukum.
                                 </p>
                                 <Link
-                                    href="https://inp.polri.go.id/artikel/indonesia-rolls-out-digital-vehicle-ownership-document-for-new-cars-only"
+                                    href="https://oto.detik.com/berita/d-8375572/berlaku-2026-pajak-tahunan-kendaraan-jenis-ini-turun-drastis"
                                     target="_blank"
                                     className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800"
                                 >
