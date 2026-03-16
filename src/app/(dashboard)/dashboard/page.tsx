@@ -150,11 +150,11 @@ export default async function DashboardPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Main Article 1 */}
+                        {/* News Item 1 */}
                         <Card className="overflow-hidden border-slate-100 shadow-sm flex flex-col hover:shadow-md transition-shadow">
                             <div className="h-40 bg-[#74b3a7] relative p-4 flex items-end">
                                 <Badge className="absolute top-4 left-4 bg-blue-600 hover:bg-blue-700 border-none">
-                                    {mockNewsArticles[0].category}
+                                    PKB
                                 </Badge>
                                 <div className="absolute inset-0 flex items-center justify-center opacity-30">
                                     <div className="w-24 h-24 rounded-full border-4 border-white/50 flex items-center justify-center">
@@ -165,15 +165,19 @@ export default async function DashboardPage() {
                             <CardContent className="p-5 flex-1 flex flex-col">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                     <CalendarIcon className="h-3 w-3 text-yellow-500" />
-                                    {mockNewsArticles[0].date}
+                                    1 Oktober 2025
                                 </div>
                                 <h3 className="font-bold text-slate-900 leading-tight mb-2">
-                                    {mockNewsArticles[0].title}
+                                    Pemdaprov Jabar Akhiri Program Pemutihan Pajak Kendaraan Bermotor
                                 </h3>
                                 <p className="text-sm text-slate-600 line-clamp-2 mb-4 flex-1">
-                                    {mockNewsArticles[0].description}
+                                    Pemerintah Provinsi Jawa Barat resmi mengakhiri program pemutihan denda Pajak Kendaraan Bermotor (PKB). Mulai Oktober 2025, pembayaran pajak kembali mengikuti aturan normal yang berlaku.
                                 </p>
-                                <Link href="#" className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800 self-start mt-auto">
+                                <Link
+                                    href="https://www.jabarprov.go.id/en/berita/pemdaprov-jabar-akhiri-program-pemutihan-pajak-kendaraan-bermotor-21287"
+                                    target="_blank"
+                                    className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800 self-start mt-auto"
+                                >
                                     Baca Selengkapnya <ArrowRight className="ml-1 h-3.5 w-3.5" />
                                 </Link>
                             </CardContent>
@@ -213,15 +217,19 @@ export default async function DashboardPage() {
                             <div className="p-5 sm:p-6 flex flex-col justify-center sm:w-3/5">
                                 <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
                                     <CalendarIcon className="h-3 w-3 text-yellow-500" />
-                                    {mockNewsArticles[1].date}
+                                    4 Juni 2026
                                 </div>
                                 <h3 className="font-bold text-lg text-slate-900 leading-tight mb-2">
-                                    {mockNewsArticles[1].title}
+                                    Polri Luncurkan BPKB Elektronik (e-BPKB) Khusus Mobil Baru
                                 </h3>
                                 <p className="text-sm text-slate-600 line-clamp-3 mb-4">
-                                    {mockNewsArticles[1].description}
+                                    Korlantas Polri mulai mengimplementasikan Buku Pemilik Kendaraan Bermotor elektronik (e-BPKB). Untuk tahap awal, digitalisasi dokumen ini baru dikhususkan bagi kendaraan roda empat keluaran terbaru.
                                 </p>
-                                <Link href="#" className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800">
+                                <Link
+                                    href="https://inp.polri.go.id/artikel/indonesia-rolls-out-digital-vehicle-ownership-document-for-new-cars-only"
+                                    target="_blank"
+                                    className="text-sm font-semibold text-blue-600 flex items-center hover:text-blue-800"
+                                >
                                     Baca Selengkapnya <ArrowRight className="ml-1 h-3.5 w-3.5" />
                                 </Link>
                             </div>

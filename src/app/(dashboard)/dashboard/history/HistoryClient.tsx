@@ -118,29 +118,9 @@ export default function HistoryClient({ user, vehicles, taxHistories }: HistoryC
     const firstVehicle = vehicles[0];
 
     return (
-        <div className="flex flex-col xl:flex-row gap-6">
-            {/* Sidebar Navigation for History (Mockup Feature) */}
-            <div className="hidden xl:block w-64 shrink-0">
-                <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm sticky top-6">
-                    <nav className="space-y-1">
-                        <Button variant="secondary" className="w-full justify-start bg-blue-50 text-blue-700 hover:bg-blue-100">
-                            <HistoryIcon className="mr-2 h-4 w-4" />
-                            Riwayat
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-slate-900">
-                            <Car className="mr-2 h-4 w-4" />
-                            Riwayat Kendaraan
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-slate-900">
-                            <FileText className="mr-2 h-4 w-4" />
-                            Arsip STNK/BPKB
-                        </Button>
-                    </nav>
-                </div>
-            </div>
-
+        <div className="space-y-6">
             {/* Main Content Area */}
-            <div className="flex-1 space-y-6 min-w-0">
+            <div className="space-y-6 min-w-0">
 
                 {/* Header Title */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">

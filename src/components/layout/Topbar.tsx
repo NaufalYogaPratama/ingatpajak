@@ -36,7 +36,7 @@ export function Topbar({ user }: TopbarProps) {
                         </SheetTrigger>
                         <SheetContent side="left" className="w-64">
                             <SheetTitle className="sr-only">Menu</SheetTitle>
-                            <div className="flex items-center gap-2 mb-8">
+                            <div className="flex items-center gap-2 mb-8 shrink-0 pl-4 pt-2">
                                 <div className="flex bg-primary text-primary-foreground font-bold rounded-lg text-xl w-9 h-9 items-center justify-center shrink-0 shadow-sm">
                                     <span className="text-secondary">!</span>P
                                 </div>
@@ -70,7 +70,7 @@ export function Topbar({ user }: TopbarProps) {
                     </Sheet>
 
                     {/* Desktop Logo */}
-                    <Link href="/dashboard" className="flex items-center gap-2 group">
+                    <Link href="/dashboard" className="flex items-center gap-2 group shrink-0">
                         <div className="flex bg-primary text-primary-foreground font-bold rounded-lg text-xl w-9 h-9 items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105">
                             <span className="text-secondary">!</span>P
                         </div>
@@ -118,8 +118,10 @@ export function Topbar({ user }: TopbarProps) {
                                 <span className="text-[13px] font-bold text-slate-700 truncate max-w-[120px]">{user.name}</span>
                                 <span className="text-[10px] text-slate-400 font-medium">Wajib Pajak</span>
                             </div>
-                            <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100">
-                                <AvatarFallback className="text-primary-foreground bg-primary text-xs font-bold leading-none">{initials}</AvatarFallback>
+                            <Avatar className="h-9 w-9 border-2 border-white shadow-sm ring-1 ring-slate-100 bg-slate-100">
+                                <AvatarFallback className="bg-slate-200 flex items-center justify-center overflow-hidden">
+                                    <UserIcon className="h-5 w-5 text-slate-500" />
+                                </AvatarFallback>
                             </Avatar>
                         </div>
                         <Button
